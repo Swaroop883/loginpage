@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth System - Login & Register</title>
+    <style>
+        /* CSS: Clean and Modern UI Styling */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        h2 { 
+            color: #1c1e21; 
+            margin-bottom: 1.5rem; 
+        }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        .btn-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 15px; 
+        }
+        button { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 14px; 
+            transition: 0.3s; 
+        }
+        .register-btn { 
+            background-color: #42b72a; 
+            color: white; 
+        }
+        .login-btn { 
+            background-color: #1877f2; 
+            color: white; 
+        }
+        button:hover { 
+            opacity: 0.9; 
+        }
+        #status { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            display: none; 
+            word-break: break-all; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Login / Register</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    
+    <div class="btn-group">
+        <button class="register-btn" onclick="handleAuth('register')">Register</button>
+        <button class="login-btn" onclick="handleAuth('login')">Login</button>
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    
+    async function handleAuth(type) {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const statusDiv = document.getElementById('status');
+
+        
+        if (!u || !p) {
+            alert("Please fill in both fields");
+            return;
+        }
+
+        try {
+            // This fetch call talks directly to your running FastAPI backend
+            const response = await fetch(`http://127.0.0.1:8000/${type}?username=${u}&password=${p}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (type === 'login') {
+                    // 1. Save the JWT token and Username in browser memory
+                    localStorage.setItem('user_token', data.access_token);
+                    localStorage.setItem('user_name', u);
+                    
+                    // 2. Redirect the user to the dashboard page
+                    window.location.href = "dashboard.html";
+                } else {
+                    // Registration success message
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.backgroundColor = '#e7f3ff';
+                    statusDiv.style.color = '#1877f2';
+                    statusDiv.innerText = data.message || "User created successfully! Now click Login.";
+                }
+            } else {
+                // Handling backend errors (e.g., username taken, wrong password)
+                statusDiv.style.display = 'block';
+                statusDiv.style.backgroundColor = '#ffebe9';
+                statusDiv.style.color = '#d93025';
+                statusDiv.innerText = data.detail || "An error occurred";
+            }
+        } catch (error) {
+            // Handling connection errors (e.g., Backend server is down)
+            statusDiv.style.display = 'block';
+            statusDiv.style.backgroundColor = '#ffebe9';
+            statusDiv.style.color = '#d93025';
+            statusDiv.innerText = "Error: Backend not running? (Make sure uvicorn is active)";
+        }
+    }
+</script>
+
+</body>
+</html>
