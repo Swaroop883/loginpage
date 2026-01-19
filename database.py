@@ -8,6 +8,6 @@ Base = declarative_base()#retruns a class
 def get_db():
     db = SessionLocal()
     try:
-        yield db #allows the funcction to stay alive while your database work is happening
+        yield db #allows the conversation with the databse to stay alive while your database work is happening
     finally:
         db.close()
