@@ -1,11 +1,14 @@
 from passlib.context import CryptContext #for hashing
 from jose import JWTError,jwt #for tokens
 from datetime import datetime,timedelta
+import os
+from dotenv import load_dotenv
+load_dotenv()
 #for password hashing
 pwd_contest=CryptContext(schemes=["bcrypt"],deprecated="auto")
 #for the jwt token verification
-Secret_key = "swaroop@2006_key"
-algo = "HS256"
+Secret_key =os.getenv("SECRET_KEY")
+algo = os.getenv("ALGORITHM")
 exp_time=30
 #creating the hash
 def hash_pass(password:str):
